@@ -1,9 +1,8 @@
 import React, { useState, useRef } from 'react';
-import { StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView } from 'react-native';
+import { StyleSheet, TextInput, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, Modal, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { Feather } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export function ChatBubble({ message, isUser }) {
   return (
@@ -99,6 +98,7 @@ export default function TabOneScreen() {
       try {
         const messages = newFormattedChatMessages;
         
+          <Feather name="send" size={24} color="white" onPress={handleSendMessage} />
         console.log("==RESPONSE BODY==" + JSON.stringify({ model: "gpt-3.5-turbo", messages, max_tokens: 250 }));
         
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -148,14 +148,47 @@ export default function TabOneScreen() {
     ]);
     const formattedMessage = JSON.stringify({ role: "assistant", content: response });
   };
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+  
   
   return (
     <SafeAreaView style={styles.container}>
       <View
-        style={{ width: '100%', height: 65, backgroundColor: 'rgb(55, 48, 120)', borderBottomWidth: 1, borderColor: 'rgb(50, 43, 108)', alignItems: 'center', justifyContent: 'flex-end', padding: 15 }}
+        style={{ width: '100%', height: 65, backgroundColor: 'rgb(55, 48, 120)', borderBottomWidth: 1, borderColor: 'rgb(50, 43, 108)', alignItems: 'center', justifyContent: 'space-between', padding: 15, paddingHorizontal:25, flexDirection:'row', }}
       >
-        <Text style={{ fontSize: 18 }}>{chatTitle || 'New Chat'}</Text>
+        <View style={styles.header}>
+        <TouchableOpacity onPress={handleOpenModal}>
+          <FontAwesome name="bars" size={24} color="white" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{chatTitle || 'New Chat'}</Text>
       </View>
+        
+        <Text style={{ fontSize: 18, alignSelf:'center' }}>{chatTitle || 'New Chat'}</Text>
+      </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={handleCloseModal}
+      >
+        <TouchableWithoutFeedback onPress={handleCloseModal}>
+          <View style={styles.modalOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.modalContent}>
+          {/* Your modal content */}
+        </View>
+      </Modal>
+      
       <ScrollView
         style={styles.ChatsContainer}
         ref={scrollViewRef}
